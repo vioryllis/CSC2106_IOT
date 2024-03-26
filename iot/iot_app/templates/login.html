@@ -1,0 +1,91 @@
+{% extends "base.html" %} 
+{% block content %}
+<!-- LOGIN FORM -->
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<style>
+    .rounded-container {
+        border-radius: 20px;
+        background-color: #EEFFD1;
+        padding: 20px;
+        height: 80%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    form {
+        max-width: 400px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    h1 {
+        font-family: Arial, sans-serif;
+        margin-bottom: 20px;
+        animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .btn-green {
+        background-color: #8BC34A; /* Button background color */
+    }
+
+    .btn-green:hover {
+        background-color: #9CCC65; /* Lighter green on hover */
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 15px;
+    }
+</style>
+<div class="container mt-4">
+    <div class="rounded-container p-4">
+        <!-- Login form -->
+        <h1>Login</h1>
+        <form action="/login" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <!-- <label for="email">Email</label> -->
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email" required>
+                <!-- Add a required attribute for client-side validation -->
+            </div>
+            <div class="form-group">
+                <!-- <label for="password">Password</label> -->
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter Password" required>
+                <!-- Add a required attribute for client-side validation -->
+            </div>
+            <button type="submit" class="btn btn-green">Login</button>
+        </form>
+        {% if error_message %}
+            <div class="alert alert-danger mt-3">{{ error_message }}</div>
+            <!-- Display error message if login fails -->
+        {% endif %}
+        <div class="register-link">
+            <p>Don't have an account? <a href="{% url 'register' %}">Register here</a>.</p>
+        </div>
+    </div>
+</div>
+
+
+</body>
+{% endblock %}

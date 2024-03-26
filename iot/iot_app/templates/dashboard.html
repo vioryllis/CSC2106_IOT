@@ -1,0 +1,87 @@
+{% extends "base.html" %} 
+{% block content %}
+<!-- CHOOSE PLANT FROM A SELECTION OF LEVELS -->
+<!-- Enpoint: / -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<style>
+    /* Custom CSS for rounded container */
+    .rounded-container {
+        border-radius: 20px;
+        background-color: #EEFFD1; /* Adjust background color as needed */
+        padding: 20px;
+        height: 80%;
+    }
+
+    .canvas-container {
+        position: relative;
+        margin: auto;
+        height: 60vh;
+        width: 40vw;
+    }
+</style>
+<div class="container mt-4">
+    <!-- Rounded container behind main content -->
+    <!-- Main content container -->
+    <div class="rounded-container p-4">
+        <!-- Dashboard content goes here -->
+        <h1>Welcome, {{ user.name }}</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Total number of your plants</h5>
+                        <p class="card-text">{{ total_user_plants }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="canvas-container">
+            <canvas id="sensorDataChart"></canvas>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('sensorDataChart').getContext('2d');
+        var plantNames = JSON.parse('{{ plant_names|safe }}');
+        var avgWaterLevels = JSON.parse('{{ avg_water_levels|safe }}');
+        var avgNutrientLevels = JSON.parse('{{ avg_nutrient_levels|safe }}');
+        console.log(plantNames);
+        console.log(avgWaterLevels);
+        console.log(avgNutrientLevels);
+        var sensorDataChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: plantNames,
+                datasets: [
+                    {
+                        label: 'Average Water Level',
+                        data: avgWaterLevels,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Average Nutrient Level',
+                        data: avgNutrientLevels,
+                        backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    });
+    </script>
+{% endblock %}

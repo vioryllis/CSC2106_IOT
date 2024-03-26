@@ -1,0 +1,447 @@
+{% extends "base.html" %} 
+
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
+<div class="app-container">
+    <main class="flex-container">
+        <div class="plant-image-container">
+            <img class="plant-image" src="{% static 'farawayfarmer/hydroponic_plant.png' %}" alt="Plant Image">
+        </div>
+        <div class="info-and-actions">
+            <div class="plant-info">
+                <h2>
+                    Plant Name: {{ plant.name }}
+                    <i class="fas fa-edit" onclick="openModal('updatePlantNameModal')" data-id="{{ plant.plant_id }}" style="cursor: pointer; margin-left: 10px;"></i>
+                </h2>                <p><strong>Floor:</strong> {{ plant.floor }}</p>
+                <p>
+                    <strong>Public:</strong> {{ plant.public|yesno:"Yes,No" }}
+                    <i class="fas fa-edit" onclick="openModal('updatePlantPublicModal')" data-id="{{ plant.plant_id }}" style="cursor: pointer; margin-left: 10px;"></i>
+                </p>                <p><strong>Water Level:</strong> Minimum {{ plant.min_water_level }}ml, Amount to Water {{ plant.amt_to_water }}ml</p>
+                <div class="plant-maintenance-info">
+                    <p><strong>Last watered:</strong> {{ plant.last_watered|date:"F j, Y, P" }}</p>
+                    <p><strong>Last fertilized:</strong> {{ plant.last_fertilized|date:"F j, Y, P" }}</p>
+                </div>
+                <p><strong>Automatic Watering System Enabled:</strong> {{ plant.auto_system|yesno:"Yes,No" }}</p>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-green" id="water-btn" data-id="{{ plant.plant_id }}">
+                    <img src="{% static 'farawayfarmer/watering_can_icon.webp' %}" alt="Water" class="button-icon">
+                    Water
+                </button>
+                <button class="btn btn-green" id="fertilize-btn" data-id="{{ plant.plant_id }}">
+                    <img src="{% static 'farawayfarmer/fertilizer_icon.webp' %}" alt="Fertilize" class="button-icon">
+                    Fertilize
+                </button>
+                <button class="btn btn-green" id="on-off-btn" data-id="{{ plant.plant_id }}">
+                    <img src="{% static 'farawayfarmer/on_off_icon.png' %}" alt="On-Off" class="button-icon">
+                    On/Off
+                </button>
+            </div>
+            <a href="{% url 'delete_plant' plant.plant_id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this plant?');">Delete Plant</a>
+        </div>
+    </main>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Set Water Level and Amount</h2>
+        <form id="water-level-form">
+            <input type="hidden" id="plant-id" name="plant-id">
+            <div class="form-row">
+                <label for="min-water-level">Current minimum water level: 50ml</label>
+                <input type="number" id="min-water-level" name="min-water-level" placeholder="Enter new minimum water level" aria-describedby="minWaterLevelHelp">
+            </div>
+            <div class="form-row">
+                <label for="amount-to-water">Amount to water:</label>
+                <input type="number" id="amount-to-water" name="amount-to-water" placeholder="Enter amount to water" aria-describedby="amountToWaterHelp">
+            </div>
+            <div class="form-row">
+                <button type="submit" class="confirm-button">Confirm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Updating Plant Name -->
+<div id="updatePlantNameModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button close-update-name">&times;</span>
+        <h2>Update Plant Name</h2>
+        <form id="update-plant-name-form">
+            <div class="form-row">
+                <label for="plant-name">Plant Name:</label>
+                <input type="text" id="plant-name" name="plant-name" value="{{ plant.name }}">
+            </div>
+            <div class="form-row">
+                <button type="submit" class="confirm-button">Update Name</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Updating Public Status -->
+<div id="updatePlantPublicModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button close-update-public">&times;</span>
+        <h2>Update Plant Public Status</h2>
+        <form id="update-plant-public-form">
+            <div class="form-row">
+                <label for="plant-public">Public:</label>
+                <select id="plant-public" name="plant-public">
+                    <option value="True" {% if plant.public %}selected{% endif %}>Yes</option>
+                    <option value="False" {% if not plant.public %}selected{% endif %}>No</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <button type="submit" class="confirm-button">Update Public Status</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    // Logic for watering the plant
+    document.getElementById('water-btn').addEventListener('click', function() {
+        var plantId = this.getAttribute('data-id'); // Get individual ID from button data attribute
+        // Make AJAX call to Django view
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:80/plants/call_water_plant/", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                console.log("Watering successful");
+                // Handle success response
+            } else {
+                console.error("Failed to water plant:", xhr.responseText);
+                // Handle error response
+            }
+        };
+        var data = JSON.stringify({"plant.plant_id": plantId}); // Send individual ID in JSON format
+        xhr.send(data);
+    });
+
+    // Logic for fertilizing the plant
+    document.getElementById('fertilize-btn').addEventListener('click', function() {
+        var plantId = this.getAttribute('data-id'); // Get individual ID from button data attribute
+        // Make AJAX call to Django view
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:80/plants/call_fertilize_plant/", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                console.log("Fertilizing successful");
+                // Handle success response
+            } else {
+                console.error("Failed to fertilize plant:", xhr.responseText);
+                // Handle error response
+            }
+        };
+        var data = JSON.stringify({"plant.plant_id": plantId}); // Send individual ID in JSON format
+        xhr.send(data);
+    });
+
+    // Modal logic
+    var modal = document.getElementById('modal');
+    var btn = document.getElementById('on-off-btn'); // Button that opens the modal
+    var span = document.getElementsByClassName('close-button')[0]; // The close button inside the modal
+
+    // Function to toggle the display of the modal
+    function toggleModal() {
+        modal.style.display = (modal.style.display === "block" ? "none" : "block");
+    }
+
+    // Button click to open or close the modal
+    btn.addEventListener('click', function() {
+        var plantId = this.getAttribute('data-id'); // Retrieve the plant ID
+        document.getElementById('plant-id').value = plantId; // Set the plant ID in the hidden input
+        toggleModal(); // Open the modal
+    });
+    
+
+    // Close button click
+    span.addEventListener('click', toggleModal);
+
+    // Click outside the modal to close it
+    window.addEventListener('click', function(event) {
+        if (event.target == modal) {
+            toggleModal();
+        }
+    });
+
+    // Handle the form submission
+    document.getElementById('water-level-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var plantId = document.getElementById('plant-id').value; // Get the plant ID from the hidden input
+
+        var plantIddd = this.getAttribute('data-id'); // Get individual ID from button data attribute
+        const min_water_level = document.getElementById('min-water-level').value;
+        const amount_to_water = document.getElementById('amount-to-water').value;
+        var requestData = {
+            'plant_id': plantId,
+            'min_water_level': min_water_level,
+            'amt_to_water': amount_to_water
+        };
+        console.log(requestData)
+        // Make AJAX POST request
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:80/plants/update_plant_settings/", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    console.log("Plant settings updated successfully");
+                    // Optionally, perform any additional actions upon success
+                } else {
+                    console.error("Failed to update plant settings:", xhr.responseText);
+                    // Optionally, handle error response
+                }
+            }
+        };
+        xhr.send(JSON.stringify(requestData));
+
+        toggleModal(); // Close the modal after form submission
+    });
+
+    // Function to open a modal
+    function openModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.style.display = "block";
+        // If your modal interaction depends on the plant ID, ensure it's correctly passed and set here
+        var plantId = document.querySelector(`button[data-id]`).getAttribute('data-id'); // Assumes there's a button with a data-id attribute
+        // Store the plant ID in a hidden input within the form or directly in a global variable or the form's dataset for later use
+        document.getElementById('update-plant-name-form').setAttribute('data-id', plantId); // Example of setting it on the form directly
+        document.getElementById('update-plant-public-form').setAttribute('data-id', plantId);
+
+    }
+    
+
+// Function to close modals using the close button within each modal
+document.querySelectorAll('.close-button').forEach(function(button) {
+    button.onclick = function() {
+        var modal = this.closest('.modal'); // Find the nearest parent modal
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    };
+});
+
+// Close the modal if clicked outside of its content area (optional)
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = "none";
+    }
+};
+
+// AJAX request for updating the plant name
+document.getElementById('update-plant-name-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const plantId = this.getAttribute('data-id');
+    const plantName = document.getElementById('plant-name').value;
+
+    if (plantId && plantId !== 'null') { // Check if plantId is valid
+        fetch(`/plants/update-name/${plantId}/`, {
+            method: 'POST',
+            body: JSON.stringify({ name: plantName }),
+            headers: {
+                "Content-Type": "application/json",
+            }
+        }).then(response => {
+            if (response.ok) {
+                console.log("Plant name updated successfully.");
+                document.getElementById('updatePlantNameModal').style.display = 'none';
+                location.reload(); // Refresh to see changes
+            } else {
+                console.error("Failed to update plant name.");
+            }
+        });
+    } else {
+        console.error("Invalid plant ID.");
+    }
+});
+
+
+// AJAX request for updating the public status
+document.getElementById('update-plant-public-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    // Retrieve the plant ID correctly from the form or another element that stores it
+    const plantId = document.querySelector('#update-plant-public-form').getAttribute('data-id');
+    const plantPublic = document.getElementById('plant-public').value === "True";
+
+    if (plantId && plantId !== 'null') { // Check if plantId is valid
+        fetch(`/plants/update-public/${plantId}/`, {
+            method: 'POST',
+            body: JSON.stringify({ public: plantPublic }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(response => {
+            if (response.ok) {
+                console.log("Plant public status updated successfully.");
+                document.getElementById('updatePlantPublicModal').style.display = 'none';
+                location.reload(); // Optionally refresh the page to reflect changes
+            } else {
+                console.error("Failed to update plant public status.");
+            }
+        });
+    } else {
+        console.error("Invalid plant ID.");
+    }
+});
+
+
+</script>
+
+
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+    }
+    .app-container {
+        text-align: center;
+        height: 100vh; /* This sets the container's height to fill the entire viewport height */
+        display: flex;
+        flex-direction: column; /* Stacks main along the vertical axis */
+    }
+
+    .flex-container {
+        display: flex;
+        flex-direction: row; /* Children laid out in a row */
+        height: 100%; /* Flex-container fills the app-container height */
+    }
+    
+    .plant-image-container, .info-and-actions {
+        flex: 1; /* Each takes up half the space */
+        display: flex;
+        flex-direction: column; /* Content organized in columns */
+        padding: 10px;
+        height: 80%; /* Full height of their parent container */
+    }
+    
+    .plant-info {
+        background-color: #eeffd1;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around; /* Evenly distributes the space around the items */
+        flex: 1; /* Flex grow */
+    }
+    
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        padding: 0;
+        width: 100%;
+    }
+    
+    .info-and-actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Align items to top and bottom */
+        flex: 1; /* Flex grow */
+    }
+    
+    .plant-maintenance-info {
+        font-size: 0.9em; /* Smaller text for maintenance info */
+        color: #666; /* Darker grey text */
+        margin-top: 10px; /* Adds space above maintenance info */
+    }
+
+    .btn-green {
+        background-color: #8BC34A; /* Button background color */
+    }
+
+    .btn {
+        border-radius: 20px; /* Rounded corners */
+        padding: 10px 20px; /* Button padding */
+        border: none; /* Removes border */
+        color: white; /* Text color */
+        font-size: 1em; /* Text size */
+        margin: 5px; /* Space between buttons */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow for buttons */
+    }
+    .btn-green:hover {
+        background-color: #9CCC65; /* Lighter green on hover */
+    }
+    .button-icon {
+        margin-bottom: 5px; /* Space between icon and text */
+        width: 30px; /* Icon size */
+        height: auto; /* Maintain aspect ratio */
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000; /* Increased z-index for higher priority */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Soften the overlay */
+    }
+    
+    .modal-content {
+        background-color: #ffffff;
+        margin: 5% auto; /* Reduced to bring the modal up slightly */
+        padding: 40px; /* Increased padding for better spacing */
+        border-radius: 8px; /* Rounded corners */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+        width: 50%; /* Adjusted for a balanced width */
+        max-width: 500px; /* Maximum width to maintain form factor */
+    }
+    
+    .close-button {
+        color: #aaaaaa;
+        float: right;
+        font-size: 24px;
+        font-weight: bold;
+        border: none; /* Remove border */
+        background: none; /* Transparent background */
+    }
+    
+    .close-button:hover,
+    .close-button:focus {
+        color: #333333;
+        cursor: pointer;
+    }
+    
+    .form-row label,
+    .form-row input {
+        display: block;
+        width: 100%; /* Ensure full width within container */
+        margin-bottom: 10px; /* Adjusted spacing */
+    }
+    
+    .form-row input {
+        padding: 10px; /* Better input field spacing */
+        border: 1px solid #cccccc; /* Subtle border */
+        border-radius: 4px; /* Rounded corners for input fields */
+    }
+    
+    .confirm-button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 24px;
+        text-align: center;
+        display: block; /* Change to block for full-width button */
+        width: 100%; /* Full-width button */
+        margin: 20px 0 0; /* Adjusted margin for spacing */
+        border-radius: 4px; /* Consistent rounded corners */
+        font-weight: 500; /* Medium font weight */
+    }
+    
+</style>
+{% endblock %}

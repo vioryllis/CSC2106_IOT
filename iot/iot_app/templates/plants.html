@@ -1,0 +1,257 @@
+{% extends "base.html" %} {% block content %}
+{% load static %}
+<!-- CHOOSE PLANT FROM A SELECTION OF LEVELS -->
+<!-- Enpoint: /plants/<plantID> -->
+
+<div class="container-flex">
+    <div class="window row">
+        <div class="row cloud-container">
+            <!--iterate 3 times-->
+            {% for i in '0123'|make_list %}
+            <div class="col">
+                <img class="cloud" src="{% static 'farawayfarmer/vecteezy_white-cloud-with-shadow-design-element_23817145.png' %}" alt="Cloud Image">
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Placeholder for alignment -->
+                <div class="col-4"></div>
+        
+                <!-- Tabs and Add Plant Button -->
+                <div class="col-8">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link {% if active_filter == 'all' %}active{% endif %}" href="?user_plants=false" id="allPlantsBtn">All Public Plants</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if active_filter == 'mine' %}active{% endif %}" href="?user_plants=true" id="myPlantsBtn">My Plants</a>
+                            </li>
+                        </ul>
+        
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPlantModal" style="margin-right: 50px;">
+                            Add Plant
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="building row">
+            {% for floor in plants.items%}
+            <div class="row">
+                <div class="col-4"></div>
+                <div class="col-8 row level">
+                    <div class="col-2">
+                        <div class="sign">
+                            <h3>
+                                Level {{ floor.0 }}
+                            </h3>
+                        </div>
+                        
+                    </div>
+                    <div class="col-10 card level-plants">
+                        <div class="row">
+                            <div class="plant">
+                                <img class="plant-image" src="{% static 'farawayfarmer/elevator.png' %}" alt="Door Image">
+                            </div>
+                            {% for plant in floor.1 %}
+                            <div class="card plant">
+                                <a class="text-center" href="/plants/{{plant.plant_id}}">
+                                    <img src="{% static 'farawayfarmer/hydroponic_plant.png' %}" alt="Plant Image" class="plant-image">
+                                    {{ plant.name }}
+                                </a>
+                            </div>
+                            {% endfor %}
+    
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="ground" class="row align-self-end"></div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addPlantModal" tabindex="-1" aria-labelledby="addPlantModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPlantModalLabel">Add New Plant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPlantForm">
+                    <div class="mb-3">
+                        <label for="plantName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="plantName" name="plantName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="isPublic" class="form-label">Public</label>
+                        <select class="form-select" id="isPublic" name="isPublic">
+                            <option value="True">Yes</option>
+                            <option value="False">No</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Plant</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <script>
+    document.getElementById('addPlantForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+        
+        // Get form data
+        var formData = new FormData(this);
+    
+        // Add current user's ID to form data
+        formData.append('user_id', '{{ request.user.id }}'); // Assumes you have access to the current user in the template
+    
+        // Send AJAX request to submit form
+        fetch('/add-plant/', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => {
+          if (response.ok) {
+            location.reload();
+          } else {
+            // Handle error
+            console.error('Error adding plant');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      });
+    </script>
+
+
+<style>
+    body {
+        background: #87CEEB;
+    }
+    
+    .modal-content {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+    }
+
+    .modal-header {
+        border-bottom: none;
+    }
+
+    .modal-title {
+        color: #343a40;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .form-label {
+        color: #343a40;
+    }
+
+    .form-control {
+        background-color: #e9ecef;
+        border-color: #ced4da;
+        color: #343a40;
+    }
+
+    .btn-active {
+        background-color: #4CAF50; /* Example active color, choose what fits your design */
+    }
+    
+    .btn-inactive {
+        background-color: #A5D6A7; /* Lighter green, for example */
+    }    
+
+    .btn-primary {
+        background-color: #8BC34A; 
+        border-color: #8BC34A;
+    }
+    
+    .btn-primary:hover {
+        background-color: #7DAF3C; 
+        border-color: #7DAF3C; 
+    }
+    
+    .window {
+        margin:0;
+        height: 100%;
+    }
+    .cloud {
+        width: 200px;
+        height: 150px;
+    }
+    .building {
+        margin:0;
+    }
+    .level {
+        margin-top: 7px;
+        margin-bottom: 3px;
+    }
+    .level .sign {
+        background-color: #EEEEEE;
+        padding: 5px;
+        border-radius: 5px;
+    }
+    .level .sign h3 {
+        text-align: center;
+    }
+    .level-plants {
+        background-color: #BFBEBE;
+    }
+    .plant {
+        margin: 5px;
+        padding: 5px;
+        height: 100px;
+        width: 100px;
+        border-radius: 5px;
+    }
+    .plant-image {
+        width: 100%;
+        }
+    #ground {
+        margin: 0;
+        width: 100%;
+        height: 100px;
+        background-color: #76552B;
+    }
+
+    .cloud-container {
+        display: flex;
+        overflow: hidden;
+        width: 100%;
+        height: 200px;
+    }
+
+    .col {
+        flex: 1;
+    }
+
+    .cloud {
+        animation: cloudMove 50s linear infinite;
+    }
+
+    @keyframes cloudMove {
+        0% {
+            transform: translateX(0); /* Initial position */
+        }
+        100% {
+            transform: translateX(100%); /* Move the cloud to the right end of its container */
+        }
+    }
+
+</style>
+{% endblock %}

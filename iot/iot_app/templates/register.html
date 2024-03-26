@@ -1,0 +1,93 @@
+{% extends "base.html" %} 
+{% block content %}
+<!-- REGISTRATION FORM -->
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<style>
+    .rounded-container {
+        border-radius: 20px;
+        background-color: #EEFFD1;
+        padding: 20px;
+        height: 80%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    form {
+        max-width: 400px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    h1 {
+        font-family: Arial, sans-serif;
+        margin-bottom: 20px;
+        animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .btn-green {
+        background-color: #8BC34A; /* Button background color */
+    }
+
+    .btn-green:hover {
+        background-color: #9CCC65; /* Lighter green on hover */
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 15px;
+    }
+</style>
+<div class="container mt-4">
+    <div class="rounded-container p-4">
+        <!-- Registration form -->
+        <h1>Register</h1>
+        <form action="/register" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" class="form-control" id="name" name="name" placeholder="Enter Full Name" required>
+            </div>
+            <div class="form-group">
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter Password" required>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="floor" name="floor" placeholder="Enter Floor" required>
+            </div>
+            <button type="submit" class="btn btn-green">Register</button>
+        </form>
+        {% if error_message %}
+            <div class="alert alert-danger mt-3">{{ error_message }}</div>
+            <!-- Display error message if registration fails -->
+        {% endif %}
+
+        <div class="login-link">
+            <p>Already have an account? <a href="{% url 'login' %}">Login here</a>.</p>
+        </div>
+    </div>
+</div>
+
+</body>
+{% endblock %}
