@@ -8,7 +8,7 @@
 <div class="app-container">
     <main class="flex-container">
         <div class="plant-image-container">
-            <img class="plant-image" src="{% static 'farawayfarmer/hydroponic_plant.png' %}" alt="Plant Image">
+            <img class="plant-image" src="{% static 'iotfarmer/hydroponic_plant.png' %}" alt="Plant Image">
         </div>
         <div class="info-and-actions">
             <div class="plant-info">
@@ -29,15 +29,15 @@
             
             <div class="action-buttons">
                 <button class="btn btn-green" id="water-btn" data-id="{{ plant.plant_id }}">
-                    <img src="{% static 'farawayfarmer/watering_can_icon.webp' %}" alt="Water" class="button-icon">
+                    <img src="{% static 'iotfarmer/watering_can_icon.webp' %}" alt="Water" class="button-icon">
                     Water
                 </button>
                 <button class="btn btn-green" id="fertilize-btn" data-id="{{ plant.plant_id }}">
-                    <img src="{% static 'farawayfarmer/fertilizer_icon.webp' %}" alt="Fertilize" class="button-icon">
+                    <img src="{% static 'iotfarmer/fertilizer_icon.webp' %}" alt="Fertilize" class="button-icon">
                     Fertilize
                 </button>
                 <button class="btn btn-green" id="on-off-btn" data-id="{{ plant.plant_id }}">
-                    <img src="{% static 'farawayfarmer/on_off_icon.png' %}" alt="On-Off" class="button-icon">
+                    <img src="{% static 'iotfarmer/on_off_icon.png' %}" alt="On-Off" class="button-icon">
                     On/Off
                 </button>
             </div>
