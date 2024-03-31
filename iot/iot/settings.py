@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-oi33&90+to+e0_5^2tw2on-olgss)o49b-y%m_zyt1i8k96g2z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # set to all to allow mesh to communicate
 
 AUTH_USER_MODEL = 'iot_app.User'
 

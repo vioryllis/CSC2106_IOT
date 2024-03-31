@@ -198,3 +198,31 @@ def index(request):
             p.save()
 
     return HttpResponse(template.render(context, request))
+
+
+#########################################
+###############  MESH  ##################
+#########################################
+
+@csrf_exempt
+def send_data(request):
+    if request.method == 'POST':
+        data = request.POST  # Assuming data is sent as form data
+        print(data)
+        # Process data received from the M5StickC device
+        # Example:
+        # YourModel.objects.create(**data)
+        return JsonResponse({'message': 'Data received successfully'})
+    else:
+        return JsonResponse({'error': 'Only POST requests are allowed'})
+
+@csrf_exempt
+def get_data(request):
+    if request.method == 'GET':
+        # Retrieve data to be sent to the M5StickC device
+        # Example:
+        # data = YourModel.objects.all().values()
+        data = {'example_key': 'example_value'}
+        return JsonResponse(data)
+    else:
+        return JsonResponse({'error': 'Only GET requests are allowed'})

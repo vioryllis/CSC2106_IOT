@@ -15,4 +15,6 @@ urlpatterns = [
     path("plants", views.plants, name="plants"),
     path("plants/<int:plant_id>", views.plant, name="plant"),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('send_data/', views.send_data, name='send_data'),
+    path('get_data/', views.get_data, name='get_data'),
 ]
