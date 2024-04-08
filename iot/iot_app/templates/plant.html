@@ -4,6 +4,7 @@
 {% load static %}
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <div class="app-container">
     <main class="flex-container">
@@ -104,7 +105,7 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js">
+<script>
     // Function to show toast messages
     function showToast(message, type) {
         toastr.options = {
