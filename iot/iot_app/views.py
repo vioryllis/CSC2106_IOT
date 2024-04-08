@@ -228,18 +228,35 @@ def call_water_plant(request):
     global last_message_water
     mqtt_broker = "172.20.10.10"
     mqtt_port = 1883
-    mqtt_topic = "M5Stack/1"
 
     if request.method == 'POST':
         data = json.loads(request.body)
         plantId = data.get('plant.plant_id')  # Ensure this matches the JSON key you're sending
         last_message_water = f"Watering plant {plantId}"
-        
+        mqtt_topic = f"M5Stack/{plantId}"
         # Publish the message to the MQTT broker
         publish.single(mqtt_topic, last_message_water, hostname=mqtt_broker, port=mqtt_port)
         return JsonResponse({"message": last_message_water})
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
+
+@csrf_exempt
+def call_fertilize_plant(request):
+    global last_message_fertilize
+    mqtt_broker = "172.20.10.10"
+    mqtt_port = 1883
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        plantId = data.get('plant.plant_id')  # Ensure this matches the JSON key you're sending
+        last_message_fertilize = f"Fertilizing plant {plantId}"
+        mqtt_topic = f"M5Stack/{plantId}"
+        # Publish the message to the MQTT broker
+        publish.single(mqtt_topic, last_message_fertilize, hostname=mqtt_broker, port=mqtt_port)
+        return JsonResponse({"message": last_message_fertilize})
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 #########################################
 ###############  MQTT  ##################
