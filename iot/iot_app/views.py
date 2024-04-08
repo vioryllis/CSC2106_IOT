@@ -200,6 +200,47 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 
+@csrf_exempt
+def water_plant(request):
+    global last_message_water
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            plant_id = data.get('plant_id')
+            last_message_water = "Watering plant " + plant_id + "!"
+            return JsonResponse({"message": last_message_water})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+    elif request.method == 'GET':
+        if last_message_water is not None:
+            response = JsonResponse({"message": last_message_water})
+            print("GET SUCCESS: ", last_message_water)
+            last_message_water = None  # Clear the message after sending
+            return response
+        else:
+            return JsonResponse({"error": "No recent watering action found."}, status=404)
+    else:
+        return JsonResponse({"error": "Only POST and GET methods are accepted."}, status=405)
+
+@csrf_exempt
+def call_water_plant(request):
+    global last_message_water
+    mqtt_broker = "172.20.10.10"
+    mqtt_port = 1883
+    mqtt_topic = "M5Stack/1"
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        plantId = data.get('plant.plant_id')  # Ensure this matches the JSON key you're sending
+        last_message_water = f"Watering plant {plantId}"
+        
+        # Publish the message to the MQTT broker
+        publish.single(mqtt_topic, last_message_water, hostname=mqtt_broker, port=mqtt_port)
+        return JsonResponse({"message": last_message_water})
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+
 #########################################
 ###############  MQTT  ##################
 #########################################
@@ -216,6 +257,18 @@ def publish_mqtt_message(request):
     # Publishing the message
     try:
         publish.single(mqtt_topic, mqtt_message, hostname=mqtt_broker, port=mqtt_port)
+        return HttpResponse("Message published successfully.")
+    except Exception as e:
+        return HttpResponse(f"Failed to publish message: {e}")
+
+def publish_msg(message):
+    mqtt_broker = "172.20.10.10"
+    mqtt_port = 1883
+    mqtt_topic = "M5Stack/1"
+
+    # Publishing the message
+    try:
+        publish.single(mqtt_topic, message, hostname=mqtt_broker, port=mqtt_port)
         return HttpResponse("Message published successfully.")
     except Exception as e:
         return HttpResponse(f"Failed to publish message: {e}")
