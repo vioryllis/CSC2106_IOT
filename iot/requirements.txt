@@ -3,3 +3,4 @@ psycopg
 python-dotenv
 django-cors-headers
 requests
+paho-mqtt==1.6.1

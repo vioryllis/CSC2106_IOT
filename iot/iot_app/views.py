@@ -201,6 +201,60 @@ def index(request):
 
 
 #########################################
+###############  MQTT  ##################
+#########################################
+import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
+import threading
+def publish_mqtt_message(request):
+    # MQTT Broker settings
+    mqtt_broker = "172.20.10.10"
+    mqtt_port = 1883
+    mqtt_topic = "M5Stack/1"
+    mqtt_message = " u a bij frfr"
+
+    # Publishing the message
+    try:
+        publish.single(mqtt_topic, mqtt_message, hostname=mqtt_broker, port=mqtt_port)
+        return HttpResponse("Message published successfully.")
+    except Exception as e:
+        return HttpResponse(f"Failed to publish message: {e}")
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+    topics = [("M5Stack/1", 0), ("M5Stack/2", 0)]  # List of topics with QoS level 0
+    client.subscribe(topics)
+
+def on_message(client, userdata, msg):
+    message_str = msg.payload.decode('utf-8')
+    topic_parts = msg.topic.split('/')
+    if len(topic_parts) == 2:
+        device_id = topic_parts[1]
+        print(f"Received message from M5Stack {device_id}: {message_str}")
+    else:
+        print(f"Received message from unknown topic {msg.topic}: {message_str}")
+
+def start_mqtt():
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+
+    client.connect("172.20.10.10", 1883, 60)
+    
+    # Non-blocking call that processes network traffic, dispatches callbacks and
+    # handles reconnecting.
+    client.loop_start()
+
+def start_mqtt_listener(request):
+    try:
+        thread = threading.Thread(target=start_mqtt)
+        thread.daemon = True  # Daemon threads exit when the program does
+        thread.start()
+        return HttpResponse("MQTT listener started")
+    except Exception as e:
+        return HttpResponse(f"Error starting MQTT listener: {e}")
+
+#########################################
 ###############  MESH  ##################
 #########################################
 
