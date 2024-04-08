@@ -104,8 +104,27 @@
     </div>
 </div>
 
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
+    // Function to show toast messages
+    function showToast(message, type) {
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            preventDuplicates: true,
+            newestOnTop: true,
+            showDuration: '300',
+            hideDuration: '1000',
+            timeOut: '5000',
+            extendedTimeOut: '1000',
+            showEasing: 'swing',
+            hideEasing: 'linear',
+            showMethod: 'fadeIn',
+            hideMethod: 'fadeOut'
+        };
+        toastr[type](message);
+    }
     // Logic for watering the plant
     document.getElementById('water-btn').addEventListener('click', function() {
         var plantId = this.getAttribute('data-id'); // Get individual ID from button data attribute
@@ -117,9 +136,11 @@
             if (xhr.readyState === 4 && xhr.status === 200) {
                 console.log("Watering successful");
                 // Handle success response
+                showToast('Plant watered successfully', 'success');
             } else {
                 console.error("Failed to water plant:", xhr.responseText);
                 // Handle error response
+                showToast('Failed to water plant', 'error');
             }
         };
         var data = JSON.stringify({"plant.plant_id": plantId}); // Send individual ID in JSON format
