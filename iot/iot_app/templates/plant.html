@@ -104,8 +104,7 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-<script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js">
     // Function to show toast messages
     function showToast(message, type) {
         toastr.options = {
@@ -146,7 +145,8 @@
         var data = JSON.stringify({"plant.plant_id": plantId}); // Send individual ID in JSON format
         xhr.send(data);
     });
-
+    </script>
+    <script>
     // Logic for fertilizing the plant
     document.getElementById('fertilize-btn').addEventListener('click', function() {
         var plantId = this.getAttribute('data-id'); // Get individual ID from button data attribute
