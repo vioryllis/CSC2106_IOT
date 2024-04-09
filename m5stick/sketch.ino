@@ -5,8 +5,8 @@
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-const char* ssid = "raidensupremacy";
-const char* password = "matchasupremacy";
+const char* ssid = "yourwifinamehere";
+const char* password = "yourwifipasswordhere";
 const char* mqtt_server = "172.20.10.10";
 
 void setupWifi();
@@ -28,10 +28,10 @@ void setup() {
   client.loop();
 
   // Publish a message once after setup
-  char msg[] = "Hello from M5StickC Plus";
+  char msg[] = "{\"water_level\":10.5,\"nutrient_level\":5.2,\"plant_id\":1}";
   M5.Lcd.print("Publish message: ");
   M5.Lcd.println(msg);
-  client.publish("M5Stack", msg);
+  client.publish("M5Stack/1", msg);
 }
 
 void loop() {
@@ -46,6 +46,12 @@ void loop() {
   if (M5.BtnA.wasPressed()) {
     M5.Lcd.fillScreen(BLACK); // Clear the LCD screen
     M5.Lcd.setCursor(0, 0); // Reset the cursor to the top-left corner
+
+    // Publish a message once after button press
+    char msg[] = "{\"water_level\":10.5,\"nutrient_level\":5.2,\"plant_id\":1}";
+    M5.Lcd.print("Publish message: ");
+    M5.Lcd.println(msg);
+    client.publish("M5Stack/1", msg);
   }
 
   // Check if data is available on the serial port

@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.safestring import mark_safe
 from decimal import Decimal
+import re
 
 def register(request):
     if request.method == 'POST':
@@ -258,6 +259,47 @@ def call_fertilize_plant(request):
         return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
+@csrf_exempt
+def receive_data(request):
+    if request.method == 'POST':
+        try:
+            # Parse the incoming JSON data
+            data = json.loads(request.body.decode('utf-8'))
+            print("data from m5stick: ", data)
+
+            # Extract sensor data and plant_id from the incoming data
+            water_level = data['water_level']
+            nutrient_level = data['nutrient_level']
+            plant_id = data['plant_id']
+
+            sensor_data_table_name = SensorData._meta.db_table
+            plant_table_name = Plant._meta.db_table
+            print(f"Accessing SensorData database table: {sensor_data_table_name}")
+            print(f"Accessing Plant database table: {plant_table_name}")
+            
+            # Retrieve the plant instance associated with plant_id
+            plant = Plant.objects.get(pk=plant_id)
+            
+            # Create a new SensorData instance and save it to the database
+            sensor_data = SensorData(
+                water_level=water_level,
+                nutrient_level=nutrient_level,
+                plant=plant
+            )
+            sensor_data.save()
+            
+            return JsonResponse({"status": "success", "message": "Sensor data saved successfully"})
+        except KeyError as e:
+            return JsonResponse({"status": "error", "message": f"Missing field in request data: {str(e)}"}, status=400)
+        except Plant.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Plant not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"status": "error", "message": "Invalid JSON format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    else:
+        return JsonResponse({"status": "error", "message": "Only POST requests are allowed"}, status=405)
+
 #########################################
 ###############  MQTT  ##################
 #########################################
@@ -292,7 +334,8 @@ def publish_msg(message):
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
-    topics = [("M5Stack/1", 0), ("M5Stack/2", 0)]  # List of topics with QoS level 0
+    topics = [("M5Stack/7", 0), ("M5Stack/8", 0), ("M5Stack/1", 0)]  # List of topics with QoS level 0
+    # , ("M5Stack/1", 0)
     client.subscribe(topics)
 
 def on_message(client, userdata, msg):
@@ -300,7 +343,36 @@ def on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
     if len(topic_parts) == 2:
         device_id = topic_parts[1]
-        print(f"Received message from M5Stack {device_id}: {message_str}")
+        print(f"Received Data from M5Stick {device_id}: {message_str}")
+
+        water_level_match = re.search(r'"water_level":([0-9.]+)', message_str)
+        nutrient_level_match = re.search(r'"nutrient_level":([0-9.]+)', message_str)
+        plant_id_match = re.search(r'"plant_id":([0-9]+)', message_str)
+        
+        # Extract the matched groups as the numeric values
+        # Convert them to the appropriate types (float or int)
+        if water_level_match and nutrient_level_match and plant_id_match:
+            water_level = float(water_level_match.group(1))
+            nutrient_level = float(nutrient_level_match.group(1))
+            plant_id = int(plant_id_match.group(1))
+            
+            print(f"Extracted data - Water Level: {water_level}, Nutrient Level: {nutrient_level}, Plant ID: {plant_id}")
+    
+            sensor_data_table_name = SensorData._meta.db_table
+            plant_table_name = Plant._meta.db_table
+            print(f"Accessing SensorData database table: {sensor_data_table_name}")
+            print(f"Accessing Plant database table: {plant_table_name}")
+            
+            # Retrieve the plant instance associated with plant_id
+            plant = Plant.objects.get(pk=plant_id)
+            
+            # Create a new SensorData instance and save it to the database
+            sensor_data = SensorData(
+                water_level=water_level,
+                nutrient_level=nutrient_level,
+                plant=plant
+            )
+            sensor_data.save()
     else:
         print(f"Received message from unknown topic {msg.topic}: {message_str}")
 
