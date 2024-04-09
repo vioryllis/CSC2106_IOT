@@ -18,4 +18,13 @@ remember to change to your own db details
 cd into iot and 'pip install -r requirements.txt'
 remember to run 'python manage.py migrate'
 ```
+
+run the app: cd into iot
+```
+py manage.py runserver 0.0.0.0:8000
+```
+
+m5stick codes are in the m5stick folder, remember to change configs & topics
+
+mesh codes are in the mesh folder
 ## ty
